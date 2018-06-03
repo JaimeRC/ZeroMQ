@@ -1,78 +1,72 @@
-//const { getWorkers, clearArgs, showArguments } = require('./utils')
-const utils = require('./utils')
 require('../config/enviroment')
 
 const zmq = require('zeromq'),
     frontend = zmq.socket('router'),
-    backend = zmq.socket('router')
+    backend = zmq.socket('router'),
+    ipClient = `tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}`,
+    ipWorker = `tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`;
 
-const WORKING = true
-const workers = []
-const info = true
+var workers = [] // list of available worker id's
 
-if (info) {
-    console.log("Broker:")
-    console.log(`- frontend escuchando en tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}...`)
-    console.log(`- backend escuchando en tcp://${IP_BROKER}:${PORT_WORKER_BROKER}...`)
-}
+module.exports = {
 
-frontend.bindSync(`tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}`)
-backend.bindSync(`tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`)
+    loadFrontend() {
 
-frontend.on("message", () => {
-    let args = Array.apply(null, arguments)
-    let worker = utils.getWorkers(workers)
+        frontend.identity = 'frontend_proxy'
+        frontend.bind(ipClient, function (err) {
+            if (err) throw err;
 
-    console.log(args)
-    if (info) {
-        console.log(`Recibe mensaje: ${args[2]} del cliente (${args[0]})`)
-        utils.showArguments(args)
+            console.log("Frontend en escucha: " + frontend.identity)
+
+            frontend.on('message', function () {
+
+                let buffer = Array.apply(null, arguments),
+                    idClient = buffer[0],
+                    empty = buffer[1],
+                    query = buffer[2];
+
+                var interval = setInterval(function () {
+
+                    if (workers.length > 0) {
+                        console.log(query)
+                        backend.send([workers.shift(), '', idClient, '', query])
+                        clearInterval(interval)
+                    }
+
+                }, 10)
+            });
+        });
+    },
+
+    loadBackend() {
+
+        backend.identity = 'backend_proxy'
+        backend.bind(ipWorker, function (err) {
+            if (err) throw err;
+
+            console.log("Backend en escucha: " + backend.identity)
+
+            backend.on('message', function () {
+
+                let buffer = Array.apply(null, arguments),
+                    idWorker = buffer[0],
+                    empty0 = buffer[1],
+                    idClient = buffer[2],
+                    empty1 = buffer[3],
+                    query = buffer[4]; 
+
+                workers.push(idClient.toString())
+
+                if (workers[0] != "READY") {
+                    frontend.send([idClient, empty0, query])
+                }
+            })
+        })
+
+    },
+
+    loadBroker() {
+        this.loadFrontend();
+        this.loadBackend();
     }
-
-    if (worker == null) {
-        console.log("No hay Workers")
-        frontend.send([args[0], "", "No hay Workers"])
-        return
-    }
-
-    if (info) {
-        console.log(`Enviando Client: (${args[2]}) req a Worker (${worker}) al backend`)
-        utils.showArguments(args)
-    }
-
-    worker[worker][0] = WORKING
-    worker[worker][1] += 1
-    backend.send([worker, "", args])
-
-})
-
-backend.on("message", () => {
-    let args = Array.apply(null, arguments)
-
-    if (workers[args[0]] == undefined) {
-        workers[args[0]] = [!WORKING, 0]
-
-        if (info) {
-            console.log(`Recibiendo respuesta: (${args[2]}) del Worker (${args[0]})`);
-            utils.showArguments(args);
-        }
-
-    } else {
-
-        workers[args[0]][0] = !WORKING;
-
-        if (info) {
-            console.log(`Recibiendo respuesta: (${args[2]}) del Worker (${args[0]})`);
-            utils.showArguments(args);
-        }
-    }
-
-    if (args[2] != "READY") {
-        console.log(`ENviando Worker: (${args[0]}) rep al Client (${args[2]}) al backend`);
-        args = clearArgs(args);
-        utils.showArguments(args);
-
-        frontend.send([args[0], "", args[2]]);
-    }
-    console.log(workers);
-})
+}  

@@ -1,24 +1,34 @@
 require('../config/enviroment')
-const uuidv4 = require('uuid/v4')
 
-const zmq = require('zeromq')
-    , req = zmq.socket('req');
+const zmq = require('zeromq'),
+    req = zmq.socket('req'),
+    ipClient = `tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}`;
 
-let identifyClient = uuidv4();
-let message = "¿Hola Caracola?"
+module.exports = {
 
-req.identity = identifyClient;
+    conection() {
+        req.connect(ipClient)
+        req.identity = 'client_proxy'
+    },
 
-req.connect(`tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}`);
+    sendMessage(msg) {
+        this.conection();
 
-console.log(`Cliente (${identifyClient}) conectado a tcp://${IP_BROKER}:${PORT_CLIENT_BROKER}`)
+        let query = JSON.stringify(msg)
+        console.log("Client: " + query)
+        req.send(query)
+    },
 
-req.on("message", (msg) => {
-    console.log(`Cliente (${identifyClient}) ha recibido respuesta: ${msg}`)
+    getMessage() {
+        return new Promise((resolve, reject) => {
+            req.on('message', function (data) {
+                console.log(idClient + " <- '" + data + "'");
 
-    req.close()
-    process.exit(0)
-})
-
-console.log(`Cliente (${identifyClient}) ha enviado el mensaje: ${message}`)
-req.send(message)
+                resolve(data)
+            })
+        })
+    },
+    disconection() {
+        req.close()
+    }
+}

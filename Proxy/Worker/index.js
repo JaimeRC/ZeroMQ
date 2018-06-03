@@ -1,39 +1,49 @@
-const utils = require('./utils')
 require('../config/enviroment')
 
-const uuidv4 = require('uuid/v4')
-
 const zmq = require('zeromq'),
-    rep = zmq.socket('req')
+    req = zmq.socket('req'),
+    ipWorker = `tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`;
 
-let identifyWorrker = uuidv4()
-let response = "¿Que pasa compadre?"
-let info = true
+module.exports = {
 
-let num = 0
+    conection() {
+        req.identity = "worker_proxy"
+        req.connect(ipWorker)
 
-if (info) {
-    console.log(`Worker (${identifyWorrker}) se ha conectado a tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`)
-    console.log(`Worker (${identifyWorrker}) ha confirmado la recepcion del mensaje: ${DISPO}`)
-}
+        this.sendMessage("READY")
+    },
 
-rep.identity = identifyWorrker
-rep.connect(`tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`)
+    sendMessage(msg) {
+        req.send(msg) 
+    }, 
 
-rep.on("message", () => {
-    let args = Array.apply(null, arguments)
-console,log(args)
-    if (info) {
-        console.log(`Worker (${identifyWorrker}) ha recibido el mensaje: (${args[2]}) del Client (${args[0]}).`)
-        utils.showArguments(args)
+    getMessage() { 
+        req.on('message', function () { 
+
+            console.log("worker " + Array.apply(null, arguments))
+
+            let buffer = Array.apply(null, arguments),
+                idWorker = buffer[0],
+                empty0 = buffer[1],
+                idClient = buffer[2],
+                empty1 = buffer[3],
+                quey = buffer[4]
+
+            let msg = JSON.parse(query)
+
+            if (msg.request === "¿Hola Pajarito?") {
+                msg.response = "Pio Pio"
+                msg.status = "OK"
+            } else {
+                msg.response = "Muuuuuu"
+                msg.status = "KO"
+            }
+
+            let response = JSON.stringify(msg)
+
+            console.log(idWorker)
+
+            this.sendMessage([idClient, empty0, query])
+        })
     }
-
-    setTimeout(() => {
-        if (info) {
-            console.log(`Worker (${identifyWorrker}) ha enviado su respuest`)
-            utils.showArguments([args[0], "", response]);
-            console.log(`Worker (${identifyWorrker}) ha enviado ${++num} repuestas`)
-        }
-        rep.send([args[0], "", response])
-    }, 3000)
-})
+}
