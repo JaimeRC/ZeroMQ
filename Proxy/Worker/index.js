@@ -1,29 +1,28 @@
-require('../config/enviroment')
-
-const zmq = require('zeromq'),
-    req = zmq.socket('req'),
-    ipWorker = `tcp://${IP_BROKER}:${PORT_WORKER_BROKER}`;
+require('dotenv').config()
+const { env: { HOST, PORT_WORKER_BROKER, DISPO } } = process
+const ipWorker = `tcp://${HOST}:${PORT_WORKER_BROKER}`
 
 module.exports = {
 
-    conection() {
-        req.identity = "worker_proxy"
-        req.connect(ipWorker)
+    const: zmq = require('zeromq'),
+    const: worker = zmq.socket('req'),
 
-        this.sendMessage("READY")
+    conection() {
+        worker.identity = 'worker_proxy' + process.pid
+        worker.connect(ipWorker)
+
+        this.sendMessage(DISPO)
     },
 
     sendMessage(msg) {
-        req.send(msg) 
-    }, 
+        worker.send(msg)
+    },
 
-    getMessage() { 
-        req.on('message', function () { 
+    getMessage() {
+        worker.on('message', function (...buffer) {
+            console.log(buffer)
 
-            console.log("worker " + Array.apply(null, arguments))
-
-            let buffer = Array.apply(null, arguments),
-                idWorker = buffer[0],
+            let idWorker = buffer[0],
                 empty0 = buffer[1],
                 idClient = buffer[2],
                 empty1 = buffer[3],

@@ -1,15 +1,17 @@
-const client = require('./Client/index')
-const broker = require('./Broker/index')
-const worker = require('./Worker/index')
+const client = require('./Client/index'),
+    broker = require('./Broker/index'),
+    worker = require('./Worker/index')
 
 module.exports = (req, res) => {
 
     const { body } = req;
 
-    worker.conection()
     broker.loadBroker()
-
-    setTimeout(() => client.sendMessage(body), 10)
+    //setTimeout(() => worker.conection(), 10)
+    setTimeout(() => {
+        worker.conection()
+        client.sendMessage(body)
+    }, 10)
 
     client.getMessage()
         .then(data => {
@@ -17,10 +19,10 @@ module.exports = (req, res) => {
             res.json(data)
 
             client.disconection()
-        })
+        }) 
         .catch(err => {
             res.statusCode = 500
             res.json(err)
         })
-        
+
 }
