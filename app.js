@@ -1,3 +1,6 @@
+require('dotenv').config()
+const port = process.env.PORT_EXPRESS
+
 const proxy = require('./Proxy/index')
 
 const express = require('express'),
@@ -5,9 +8,6 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     jsonBodyParser = bodyParser.json();
 
-
 app.post('/example/proxy', jsonBodyParser, proxy)
 
-app.listen(PORT_EXPRESS, () =>{
-    console.log(`Server running in port ${PORT_EXPRESS}`)
-} ) 
+app.listen(port, () => { console.log(`Server running in port ${port}`) })  

@@ -2,8 +2,8 @@ cluster = require('cluster')
     , zmq = require('zeromq')
     , backAddr = 'tcp://127.0.0.1:12345'
     , frontAddr = 'tcp://127.0.0.1:12346'
-    , clients = 5
-    , workers = 5;
+    , clients = 1
+    , workers = 1;
 
 function clientProcess() {
     var sock = zmq.socket('req');
@@ -12,7 +12,7 @@ function clientProcess() {
     sock.send("HELLO")
 
     sock.on('message', function (id, empty, data) {
-        console.log(sock.identity + " <- '" + id + "-"+empty+"-"+data + "'" + "         4");
+        console.log(sock.identity + " <- '" + id + "-" + empty + "-" + data + "'" + "         4");
         sock.close()
         cluster.worker.kill()
     })
@@ -43,7 +43,7 @@ function loadBalancer() {
             // Any worker that messages us is ready for more work
             workers.push(arguments[0])
             if (arguments[2] != 'READY') {
-                console.log("back -> " + Array.apply(null,arguments)  + "         3")
+                console.log("back -> " + Array.apply(null, arguments) + "         3")
                 frontSvr.send([arguments[2], arguments[3], arguments[4]])
             }
         })
@@ -57,7 +57,7 @@ function loadBalancer() {
         frontSvr.on('message', function () {
             var args = Array.apply(null, arguments)
 
-            console.log("front -> " + Array.apply(null,arguments)  + "         1")
+            console.log("front -> " + Array.apply(null, arguments) + "         1")
             // What if no workers are available? Delay till one is ready.
             // This is because I don't know the equivalent of zmq_poll
             // in Node.js zeromq, which is basically an event loop itself.
