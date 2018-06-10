@@ -1,18 +1,19 @@
 require('dotenv').config()
 
+const zmq = require('zeromq'),
+    { env: { HOST_BROKER, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process,
+    ipClient = `tcp://${HOST_BROKER}:${PORT_CLIENT_BROKER}`,
+    ipWorker = `tcp://${HOST_BROKER}:${PORT_WORKER_BROKER}`
+
+let frontend,
+    backend
+
+let workers = []
+
 module.exports = {
 
-    const: { env: { HOST_BROKER, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process,
-    const: zmq = require('zeromq'),
-    const: frontend = zmq.socket('router'),
-    const: backend = zmq.socket('router'),
-    const: ipClient = `tcp://${HOST_BROKER}:${PORT_CLIENT_BROKER}`,
-    const: ipWorker = `tcp://${HOST_BROKER}:${PORT_WORKER_BROKER}`,
-    let: workers = [],
-
     loadFrontend() {
-
-
+        frontend = zmq.socket('router')
         frontend.identity = 'frontend_proxy' + process.pid
         frontend.bind(ipClient, function (err) {
             if (err) throw err;
@@ -32,14 +33,14 @@ module.exports = {
                         backend.send([workers.shift(), '', idClient, '', query])
                         clearInterval(interval)
                     }
- 
+
                 }, 10)
             });
         });
     },
 
     loadBackend() {
-
+        backend = zmq.socket('router')
         backend.identity = 'backend_proxy' + process.pid
         backend.bind(ipWorker, function (err) {
             if (err) throw err;
