@@ -1,13 +1,14 @@
 require('dotenv').config()
 const { env: { HOST, PORT_WORKER_BROKER, DISPO } } = process
-const ipWorker = `tcp://${HOST}:${PORT_WORKER_BROKER}`
+
+const zmq = require('zeromq'),
+    ipWorker = `tcp://${HOST}:${PORT_WORKER_BROKER}`
+let worker;
 
 module.exports = {
 
-    const: zmq = require('zeromq'),
-    const: worker = zmq.socket('req'),
-
     conection() {
+        worker = zmq.socket('req')
         worker.identity = 'worker_proxy' + process.pid
         worker.connect(ipWorker)
 
