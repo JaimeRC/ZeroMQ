@@ -1,27 +1,32 @@
-require('dotenv').config()
-import * as zmq from 'zeromq'
+import zeromq from 'zeromq'
+import { service } from '../service/service';
 
-const { env: { HOST, PORT_WORKER_BROKER, DISPO } } = process
+export class Worker implements service {
+    private zmq: any
+    private id: string
+    private ipWorker: string
+    private DISPO: string = 'READY'
 
-const ipWorker: string = `tcp://${HOST}:${PORT_WORKER_BROKER}`
-let worker: any;
+    constructor(id: string, ipWorker: string) {
+        this.id = id;
+        this.ipWorker = ipWorker
+    }
 
-export = {
+    conection(): void {
+        this.zmq = zeromq.socket('req')
+        this.zmq.identity = this.id
+        this.zmq.connect(this.ipWorker)
 
-    conection(): any {
-        worker = zmq.socket('req')
-        worker.identity = 'worker_proxy' + process.pid
-        worker.connect(ipWorker)
+        this.sendMessage(this.DISPO)
+    }
 
-        this.sendMessage(DISPO)
-    },
+    sendMessage(msg: string): void {
+        this.zmq.send(msg)
+    }
 
-    sendMessage(msg: string) {
-        worker.send(msg)
-    },
+    getMessage(): void {
 
-    getMessage(): any {
-        worker.on('message', function (...buffer: Array<Buffer>) {
+        this.zmq.on('message', function (...buffer: Array<Buffer>): void {
             console.log(buffer)
 
             let idWorker: Buffer = buffer[0],
@@ -46,5 +51,9 @@ export = {
 
             this.sendMessage([idClient, empty0, response])
         })
+    }
+
+    disconection() {
+      //  this.zmq.disconection()
     }
 }
