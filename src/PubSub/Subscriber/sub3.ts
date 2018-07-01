@@ -9,13 +9,13 @@ const HOST: string = process.env.HOST,
 
 export = {
 
-    conection(): any {
+    conection(): void {
         sub.connect(ip)
         sub.subscribe(channel)
     },
 
-    getMessage(): any {
-        sub.on('message', function (msg: Buffer) {
+    getMessage(): void {
+        sub.on('message', function (msg: Buffer): void {
             console.log('Subcrite3 recibido: ' + msg.toString())
         })
     }
