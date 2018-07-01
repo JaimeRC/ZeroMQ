@@ -1,13 +1,12 @@
 require('dotenv').config();
 const port = process.env.PORT_EXPRESS
 
-import proxy from './Proxy'
+import proxy from './Proxy/index'
 import pullpush from './PullPush'
 
-import express from 'express'
-import * as bodyParser from 'body-parser'
-
-const app: express.Express = express(),
+const express = require('express'),
+    bodyParser = require('body-parser'),
+    app = express(),
     jsonBodyParser = bodyParser.json();
 
 app.post('/example/proxy', jsonBodyParser, proxy)
