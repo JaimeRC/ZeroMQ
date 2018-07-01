@@ -1,43 +1,49 @@
-require('dotenv').config()
-import * as zmq from 'zeromq'
+import * as zeromq from 'zeromq'
+import { service } from '../service/service';
 
-const { env: { HOST, PORT_CLIENT_BROKER } } = process
+export class Client implements service {
+    private zmq: any
+    private id: string
+    private ipClient: string
+    private msg: JSON
 
-const ipClient: string = `tcp://${HOST}:${PORT_CLIENT_BROKER}`
+    constructor(id: string, ipClient: string, msg: JSON) {
+        this.id = id
+        this.ipClient = ipClient
+        this.msg = msg
+    }
 
-let req: any;
+    conection(): void {
+        this.zmq = zeromq.socket('req')
+        this.zmq.connect(this.ipClient)
+        this.zmq.identity = this.id
+    }
 
-export = {
+    sendMessage(): void {
+        this.conection()
 
-    conection(): any {
-        req = zmq.socket('req')
-        req.connect(ipClient)
-        req.identity = 'client_proxy' + process.pid
-    },
-
-    sendMessage(msg: JSON): any {
-        this.conection();
-
-        let query: string = JSON.stringify(msg)
+        let query: string = JSON.stringify(this.msg)
 
         console.log("Client: " + query)
 
-        req.send(query)
-    },
+        this.zmq.send(query)
+    }
 
-    getMessage(): any {
-        return new Promise((resolve, reject) => {
-            req.on('message', function (...buffer: Array<Buffer>): any {
-                console.log(req.identity + " <- '" + buffer + "'");
+    getMessage(): Promise<JSON> {
+        return new Promise((resolve, reject): void => {
+
+            this.zmq.on('message', function (...buffer: Array<Buffer>): void {
+
+                console.log(this.zmq.identity + " <- '" + buffer + "'");
 
                 let response = JSON.parse(buffer.toString())
 
                 resolve(response)
             })
         })
-    },
+    }
 
-    disconection(): any {
-        req.close()
+    disconection(): void {
+        this.zmq.close()
     }
 }
