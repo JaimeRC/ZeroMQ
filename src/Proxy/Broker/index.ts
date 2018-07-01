@@ -12,7 +12,7 @@ let workers: Array<string> = []
 
 export = {
 
-    loadFrontend(): any {
+    loadFrontend(): void {
         frontend = zmq.socket('router')
         frontend.identity = 'frontend_proxy' + process.pid
         frontend.bind(ipClient, function (err: Error) {
@@ -20,13 +20,13 @@ export = {
 
             console.log("Frontend en escucha: " + frontend.identity)
 
-            frontend.on('message', function (...buffer: Array<Buffer>): any {
+            frontend.on('message', function (...buffer: Array<Buffer>): void {
 
                 let idClient: Buffer = buffer[0],
                     empty: Buffer = buffer[1],
                     query: Buffer = buffer[2]
 
-                let interval = setInterval(function (): any {
+                let interval = setInterval(function (): void {
 
                     if (workers.length > 0) {
                         console.log("Frontend envia: " + query)
@@ -39,10 +39,10 @@ export = {
         });
     },
 
-    loadBackend(): any {
+    loadBackend(): void {
         backend = zmq.socket('router')
         backend.identity = 'backend_proxy' + process.pid
-        backend.bind(ipWorker, function (err: Error): any {
+        backend.bind(ipWorker, function (err: Error): void {
             if (err) throw err;
 
             console.log("Backend en escucha: " + backend.identity)
@@ -67,7 +67,7 @@ export = {
         })
     },
 
-    loadBroker(): any {
+    loadBroker(): void {
         this.loadFrontend();
         this.loadBackend();
     }
