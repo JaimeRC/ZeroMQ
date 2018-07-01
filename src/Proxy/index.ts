@@ -1,28 +1,39 @@
+require('dotenv').config();
 import { Request, Response } from 'express'
-import client from './Client/index'
-import broker from './Broker/index'
-import worker from './Worker/index'
+import { Client } from './Client/index'
+import broker = require('./Broker/index')
+import { Worker } from './Worker/index'
 
-export = (req: Request, res: Response) => {
+const { env: { HOST, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process,
+    idClient: string = `client_proxy_${process.pid}`,
+    ipClient: string = `tcp://${HOST}:${PORT_CLIENT_BROKER}`,
+    idWorker: string = `worker_proxy_${process.pid}`,
+    ipWorker: string = `tcp://${HOST}:${PORT_WORKER_BROKER}`
+
+export = (req: Request, res: Response): void => {
 
     const { body } = req;
 
     broker.loadBroker()
 
-    setTimeout((): any => {
+    let client = new Client(idClient, ipClient, body)
+    let worker = new Worker(idWorker, ipWorker)
+
+    setTimeout((): void => {
         worker.conection()
-        client.sendMessage(body)
+        client.conection()
+        client.sendMessage()
     }, 10)
 
     client.getMessage()
-        .then((data: JSON): any => {
+        .then((data: JSON): void => {
 
             res.statusCode = 200;
             res.json(data)
 
             client.disconection()
         })
-        .catch((err: any): any => {
+        .catch((err: Error): void => {
             res.statusCode = 500
             res.json(err)
         })
