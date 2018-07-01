@@ -9,12 +9,12 @@ const ip: string = `tcp://${HOST}:${PORT_PULL_PUSH}`
 
 export = {
 
-    conection(): any {
+    conection(): void {
         pull.connect(ip)
     },
 
-    getMessage(): any {
-        pull.on('message', function (msg: Buffer) {
+    getMessage(): void {
+        pull.on('message', function (msg: Buffer): void {
             console.log('Worker recibido: ' + msg.toString())
         })
     }
