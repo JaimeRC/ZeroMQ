@@ -9,11 +9,11 @@ const ip: string = `tcp://${HOST}:${PORT_PULL_PUSH}`
 
 export = {
 
-    conection(): any {
+    conection(): void {
         push.bindSync(ip)
     },
 
-    sendMessage(msg: JSON): any {
+    sendMessage(msg: JSON): void {
         let query: string = JSON.stringify(msg)
         push.send(query)
     }
