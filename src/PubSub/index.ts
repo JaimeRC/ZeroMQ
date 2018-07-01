@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import pub from './Publisher'
 
-export = (req: Request,res:Response) =>{
+export = (req: Request, res: Response): void => {
 
-    const {body} = req
+    const { body } = req
 
     pub.conection()
 
