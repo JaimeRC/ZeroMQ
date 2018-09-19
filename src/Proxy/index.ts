@@ -37,5 +37,5 @@ export = (req: Request, res: Response): void => {
             res.statusCode = 500
             res.json(err)
         })
-
 }
+
