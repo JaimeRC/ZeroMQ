@@ -21,7 +21,6 @@ class Worker {
     }
     getMessage() {
         this.zmq.on('message', function (...buffer) {
-            console.log(buffer);
             let idWorker = buffer[0], empty0 = buffer[1], idClient = buffer[2], empty1 = buffer[3], query = buffer[4];
             let msg = JSON.parse(query.toString());
             if (msg.request === "¿Hola Pajarito?") {
@@ -33,7 +32,6 @@ class Worker {
                 msg.status = "KO";
             }
             let response = JSON.stringify(msg);
-            console.log(idWorker);
             this.sendMessage([idClient, empty0, response]);
         });
     }

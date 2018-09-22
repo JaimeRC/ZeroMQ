@@ -9,19 +9,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const zeromq = __importStar(require("zeromq"));
 class Client {
-    constructor(id, ipClient, msg) {
+    constructor(id, ipClient) {
         this.id = id;
         this.ipClient = ipClient;
-        this.msg = msg;
     }
     conection() {
         this.zmq = zeromq.socket('req');
         this.zmq.connect(this.ipClient);
         this.zmq.identity = this.id;
     }
-    sendMessage() {
+    sendMessage(msg) {
         this.conection();
-        let query = JSON.stringify(this.msg);
+        let query = JSON.stringify(msg);
         console.log("Client: " + query);
         this.zmq.send(query);
     }
