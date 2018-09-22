@@ -5,31 +5,29 @@ export class Client implements service {
     private zmq: any
     private id: string
     private ipClient: string
-    private msg: JSON
 
-    constructor(id: string, ipClient: string, msg: JSON) {
+    constructor(id: string, ipClient: string) {
         this.id = id
         this.ipClient = ipClient
-        this.msg = msg
     }
 
-    conection(): void {
+    public conection(): void {
         this.zmq = zeromq.socket('req')
         this.zmq.connect(this.ipClient)
         this.zmq.identity = this.id
     }
 
-    sendMessage(): void {
+    public sendMessage(msg:JSON): void {
         this.conection()
 
-        let query: string = JSON.stringify(this.msg)
+        let query: string = JSON.stringify(msg)
 
         console.log("Client: " + query)
 
         this.zmq.send(query)
     }
 
-    getMessage(): Promise<JSON> {
+    public getMessage(): Promise<JSON> {
         return new Promise((resolve, reject): void => {
 
             this.zmq.on('message', function (...buffer: Array<Buffer>): void {
@@ -43,7 +41,7 @@ export class Client implements service {
         })
     }
 
-    disconection(): void {
+    public disconection(): void {
         this.zmq.close()
     }
 }
