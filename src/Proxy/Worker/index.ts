@@ -12,7 +12,7 @@ export class Worker implements service {
         this.ipWorker = ipWorker
     }
 
-    conection(): void {
+    public conection(): void {
         this.zmq = zeromq.socket('req')
         this.zmq.identity = this.id
         this.zmq.connect(this.ipWorker)
@@ -20,14 +20,13 @@ export class Worker implements service {
         this.sendMessage(this.DISPO)
     }
 
-    sendMessage(msg: string): void {
+    public sendMessage(msg: string): void {
         this.zmq.send(msg)
     }
 
-    getMessage(): void {
+    public getMessage(): void {
 
         this.zmq.on('message', function (...buffer: Array<Buffer>): void {
-            console.log(buffer)
 
             let idWorker: Buffer = buffer[0],
                 empty0: Buffer = buffer[1],
@@ -47,13 +46,11 @@ export class Worker implements service {
 
             let response: string = JSON.stringify(msg)
 
-            console.log(idWorker)
-
             this.sendMessage([idClient, empty0, response])
         })
     }
 
-    disconection() {
+    public disconection() {
       //  this.zmq.disconection()
     }
 }
