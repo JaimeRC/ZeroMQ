@@ -1,8 +1,7 @@
 # ZemoMQ 
 
-## Pattern Publish - Subscribe 
 
-![Publish - Subcribe](./img/Pub-Sub.png)
+## Pattern Request - Reply 
 
 
 
@@ -12,6 +11,15 @@
 ![Publish - Subcribe](./img/Push-Pull.png)
 
 
+
+
+## Pattern Publish - Subscribe 
+
+![Publish - Subcribe](./img/Pub-Sub.png)
+
+
+
+## Pattern Router/Dealer
 
 
 
