@@ -11,7 +11,7 @@ const PubSub_1 = __importDefault(require("./PubSub"));
 const RouterDealer_1 = __importDefault(require("./RouterDealer"));
 const Broker_1 = __importDefault(require("./RouterDealer/Broker"));
 const Proxy_1 = __importDefault(require("./Proxy"));
-const express = require('express'), bodyParser = require('body-parser'), app = express(), jsonBodyParser = bodyParser.json();
+const express = require('express'), bodyParser = require('body-parser'), app = express(), jsonBodyParser = bodyParser.json(), server = require('http').Server(app);
 app.post('/example/reqrep', jsonBodyParser, ReqRep_1.default);
 app.post('/example/pullpush', jsonBodyParser, PullPush_1.default);
 app.post('/example/pubsub', jsonBodyParser, PubSub_1.default);

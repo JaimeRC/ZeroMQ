@@ -12,15 +12,14 @@ import ProxyBroker from './Proxy/Broker'
 const express = require('express'),
     bodyParser = require('body-parser'),
     app = express(),
-    jsonBodyParser = bodyParser.json()
+    jsonBodyParser = bodyParser.json(),
+server = require('http').Server(app)
 
-    
 app.post('/example/reqrep', jsonBodyParser, ReqRep)
 
 app.post('/example/pullpush', jsonBodyParser, PullPush)
 
 app.post('/example/pubsub', jsonBodyParser, PubSub)
-
 
 app.post('/example/proxy', jsonBodyParser, Proxy)
 
