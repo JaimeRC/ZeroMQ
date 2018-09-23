@@ -1,19 +1,32 @@
 require('dotenv').config();
-const port = process.env.PORT_EXPRESS
+const PORT = process.env.PORT_EXPRESS
 
-import proxy from './Proxy'
-import pullpush from './PullPush'
-import pubsub from './PubSub'
+import ReqRep from './ReqRep'
+import PullPush from './PullPush'
+import PubSub from './PubSub'
+import RouterDealer from './RouterDealer'
+import RouterDealerBroker from './RouterDealer/Broker'
+import Proxy from './Proxy'
+import ProxyBroker from './Proxy/Broker'
 
 const express = require('express'),
     bodyParser = require('body-parser'),
     app = express(),
-    jsonBodyParser = bodyParser.json()
+    jsonBodyParser = bodyParser.json(),
+server = require('http').Server(app)
 
-app.post('/example/proxy', jsonBodyParser, proxy)
+app.post('/example/reqrep', jsonBodyParser, ReqRep)
 
-app.post('/example/pullpush', jsonBodyParser, pullpush)
+app.post('/example/pullpush', jsonBodyParser, PullPush)
 
-app.post('/example/pubsub', jsonBodyParser, pubsub)
+app.post('/example/pubsub', jsonBodyParser, PubSub)
 
-app.listen(port, () => { console.log(`Server running in port ${port}`) })  
+app.post('/example/proxy', jsonBodyParser, Proxy)
+
+app.post('/example/routerdealer', jsonBodyParser, RouterDealer)
+
+app.listen(PORT, () => {
+    console.log(`Server running in port ${PORT}`)
+   // ProxyBroker.loadBroker()
+    RouterDealerBroker.loadBroker()
+})  

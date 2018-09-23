@@ -1,19 +1,12 @@
 "use strict";
 require('dotenv').config();
 const index_1 = require("./Client/index");
-const broker = require("./Broker/index");
-const index_2 = require("./Worker/index");
-const { env: { HOST, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process, idClient = `client_proxy_${process.pid}`, ipClient = `tcp://${HOST}:${PORT_CLIENT_BROKER}`, idWorker = `worker_proxy_${process.pid}`, ipWorker = `tcp://${HOST}:${PORT_WORKER_BROKER}`;
+const { env: { HOST, PORT_CLIENT_BROKER } } = process, idClient = `client_proxy_${process.pid}`, ipClient = `tcp://${HOST}:${PORT_CLIENT_BROKER}`;
 module.exports = (req, res) => {
     const { body } = req;
-    broker.loadBroker();
-    let client = new index_1.Client(idClient, ipClient, body);
-    let worker = new index_2.Worker(idWorker, ipWorker);
-    setTimeout(() => {
-        worker.conection();
-        client.conection();
-        client.sendMessage();
-    }, 10);
+    let client = new index_1.Client(idClient, ipClient);
+    client.conection();
+    client.sendMessage(body);
     client.getMessage()
         .then((data) => {
         res.statusCode = 200;

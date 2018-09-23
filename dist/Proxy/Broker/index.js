@@ -8,14 +8,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 require('dotenv').config();
 const zmq = __importStar(require("zeromq"));
-const { env: { HOST_BROKER, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process, ipClient = `tcp://${HOST_BROKER}:${PORT_CLIENT_BROKER}`, ipWorker = `tcp://${HOST_BROKER}:${PORT_WORKER_BROKER}`;
-let frontend, backend;
+const index_1 = require("../Worker/index");
+const { env: { HOST, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process, ipBrokerClient = `tcp://${HOST}:${PORT_CLIENT_BROKER}`, ipBrokerWorker = `tcp://${HOST}:${PORT_WORKER_BROKER}`, idWorker = `worker_proxy_${process.pid}`;
+let frontend = zmq.socket('router'), backend = zmq.socket('router');
 let workers = [];
 module.exports = {
     loadFrontend() {
-        frontend = zmq.socket('router');
         frontend.identity = 'frontend_proxy' + process.pid;
-        frontend.bind(ipClient, function (err) {
+        frontend.bind(ipBrokerClient, function (err) {
             if (err)
                 throw err;
             console.log("Frontend en escucha: " + frontend.identity);
@@ -34,11 +34,12 @@ module.exports = {
     loadBackend() {
         backend = zmq.socket('router');
         backend.identity = 'backend_proxy' + process.pid;
-        backend.bind(ipWorker, function (err) {
+        backend.bind(ipBrokerWorker, function (err) {
             if (err)
                 throw err;
             console.log("Backend en escucha: " + backend.identity);
             backend.on('message', function (...buffer) {
+                console.log(buffer);
                 let idWorker = buffer[0], empty0 = buffer[1], idClient = buffer[2], empty1 = buffer[3], query = buffer[4];
                 workers.push(idClient.toString());
                 console.log("Worker disponible: " + idClient);
@@ -52,6 +53,7 @@ module.exports = {
     loadBroker() {
         this.loadFrontend();
         this.loadBackend();
+        setTimeout(() => new index_1.Worker(idWorker, ipBrokerWorker).conection(), 10);
     }
 };
 //# sourceMappingURL=index.js.map

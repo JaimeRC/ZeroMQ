@@ -17,12 +17,10 @@ export class Client implements service {
         this.zmq.identity = this.id
     }
 
-    public sendMessage(msg:JSON): void {
-        this.conection()
-
+    public sendMessage(msg: JSON): void {
         let query: string = JSON.stringify(msg)
 
-        console.log("Client: " + query)
+        console.log("Client envia: " + query)
 
         this.zmq.send(query)
     }
@@ -30,11 +28,13 @@ export class Client implements service {
     public getMessage(): Promise<JSON> {
         return new Promise((resolve, reject): void => {
 
-            this.zmq.on('message', function (...buffer: Array<Buffer>): void {
+            this.zmq.on('message', function (): void {
 
-                console.log(this.zmq.identity + " <- '" + buffer + "'");
+                var args = Array.apply(null, arguments)
 
-                let response = JSON.parse(buffer.toString())
+                console.log(this.zmq.identity + " <- '" + args + "'");
+
+                let response = JSON.parse(args.toString())
 
                 resolve(response)
             })

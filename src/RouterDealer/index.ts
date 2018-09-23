@@ -1,6 +1,6 @@
 require('dotenv').config();
 import { Request, Response } from 'express'
-import { Client } from './Client/index'
+import { Client } from './Client'
 
 const { env: { HOST, PORT_CLIENT_BROKER } } = process,
     idClient: string = `client_proxy_${process.pid}`,
@@ -14,7 +14,7 @@ export = (req: Request, res: Response): void => {
 
     client.conection()
 
-    client.sendMessage(body)
+ client.sendMessage(body)
 
     client.getMessage()
         .then((data: JSON): void => {

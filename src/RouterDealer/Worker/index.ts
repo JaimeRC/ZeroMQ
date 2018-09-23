@@ -13,10 +13,11 @@ export class Worker implements service {
     }
 
     public conection(): void {
-        this.zmq = zeromq.socket('req')
+        this.zmq = zeromq.socket('rep')
         this.zmq.identity = this.id
         this.zmq.connect(this.ipWorker)
 
+        console.log('Worker en espera...')
         this.sendMessage(this.DISPO)
     }
 
@@ -26,15 +27,12 @@ export class Worker implements service {
 
     public getMessage(): void {
 
-        this.zmq.on('message', function (...buffer: Array<Buffer>): void {
+        this.zmq.on('message', function (): void {
 
-            let idWorker: Buffer = buffer[0],
-                empty0: Buffer = buffer[1],
-                idClient: Buffer = buffer[2],
-                empty1: Buffer = buffer[3],
-                query: Buffer = buffer[4]
+                var args = Array.apply(null, arguments)
+                console.log("datos worker", args[4])
 
-            let msg = JSON.parse(query.toString())
+            let msg = JSON.parse(args[4].toString())
 
             if (msg.request === "¿Hola Pajarito?") {
                 msg.response = "Pio Pio"
@@ -46,7 +44,7 @@ export class Worker implements service {
 
             let response: string = JSON.stringify(msg)
 
-            this.sendMessage([idClient, empty0, response])
+            this.sendMessage(response)
         })
     }
 
