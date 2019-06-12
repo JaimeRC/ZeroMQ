@@ -1,5 +1,6 @@
 import * as zeromq from 'zeromq'
-import { service } from '../service/service';
+import { service } from '../service/service'
+import Q from 'q'
 
 export class Client implements service {
     private zmq: any
@@ -25,20 +26,13 @@ export class Client implements service {
         this.zmq.send(query)
     }
 
-    public getMessage(): Promise<JSON> {
-        return new Promise((resolve, reject): void => {
+    public getMessage() {
+        let deferred = Q.defer();
 
-            this.zmq.on('message', function (): void {
+        this.zmq.on('message', deferred.resolve);
+        this.zmq.on('error', deferred.reject);
 
-                var args = Array.apply(null, arguments)
-
-                console.log(this.zmq.identity + " <- '" + args + "'");
-
-                let response = JSON.parse(args.toString())
-
-                resolve(response)
-            })
-        })
+        return deferred.promise;
     }
 
     public disconection(): void {

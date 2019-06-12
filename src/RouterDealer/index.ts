@@ -14,7 +14,7 @@ export = (req: Request, res: Response): void => {
 
     client.conection()
 
- client.sendMessage(body)
+    client.sendMessage(body)
 
     client.getMessage()
         .then((data: JSON): void => {

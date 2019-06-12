@@ -1,14 +1,27 @@
-import { Request, Response } from 'express'
+const Push = require('./Producer')
+const Pull = require('./Worker')
 
-import push from './Producer'
-import pull from './Worker'
+const PushTest = new Push()
+const PullTest = new Pull()
 
-export = (req: Request, res: Response): void => {
+PushTest.connection()
+PullTest.connection()
 
-    const { body } = req
+let count = 0
+setInterval(() => {
+    PushTest.sendMessage(`Enviamos el mensaje ${count++}`)
+}, 2000)
 
-    push.conection()
-    pull.conection()
+PullTest.getMessage()
+    .then((data: any) => console.log(`Mensage recibido: ${data}`))
+    .catch((error: Error) => console.log(`Ha ocurrido un error: ${error}`))
 
-    push.sendMessage(body)
+setTimeout(() => closeProcess(), 10000)
+
+function closeProcess(): void {
+    clearInterval()
+    clearTimeout()
+    PushTest.disconnection()
+    PullTest.disconnection()
+    process.exit()
 }

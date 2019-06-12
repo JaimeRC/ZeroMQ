@@ -45,10 +45,12 @@ export class Worker implements service {
             let response: string = JSON.stringify(msg)
 
             this.sendMessage(response)
+
+            this.disconection()
         })
     }
 
     public disconection() {
-      //  this.zmq.disconection()
+        this.zmq.disconection()
     }
 }

@@ -2,13 +2,13 @@ require('dotenv').config()
 import * as zmq from 'zeromq'
 import { Worker } from '../Worker/index'
 
-const { env: { HOST, PORT_CLIENT_BROKER, PORT_WORKER_BROKER } } = process,
-    ipBrokerClient: string = `tcp://${HOST}:${PORT_CLIENT_BROKER}`,
-    ipBrokerWorker: string = `tcp://${HOST}:${PORT_WORKER_BROKER}`,
+const { env: { HOST, PORT_CLIENT_PROXY, PORT_WORKER_PROXY } } = process,
+    ipBrokerClient: string = `tcp://${HOST}:${PORT_CLIENT_PROXY}`,
+    ipBrokerWorker: string = `tcp://${HOST}:${PORT_WORKER_PROXY}`,
     idWorker: string = `worker_proxy_${process.pid}`
 
-let frontend= zmq.socket('router'),
-    backend= zmq.socket('router')
+let frontend = zmq.socket('router'),
+    backend = zmq.socket('router')
 
 let workers: Array<string> = []
 

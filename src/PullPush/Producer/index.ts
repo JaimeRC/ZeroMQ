@@ -1,20 +1,55 @@
 require('dotenv').config()
 import * as zmq from 'zeromq'
+const HOST: string = process.env.HOST,
+    PORT_PULL_PUSH: string = process.env.PORT_PULL_PUSH
 
-const HOST: string = process.env.HOST
-const PORT_PULL_PUSH: string = process.env.PORT_PULL_PUSH
+interface SocketPush {
+    connection(): void
+    sendMessage(msg: string): void
+    disconnection(): void
+}
 
-const push = zmq.socket('push')
-const ip: string = `tcp://${HOST}:${PORT_PULL_PUSH}`
+export default class Push implements SocketPush {
 
-export = {
+    private push: any
+    private ip: string
 
-    conection(): void {
-        push.bindSync(ip)
-    },
+    constructor() {
+        this.push = zmq.socket('push')
+        this.ip = `tcp://${HOST}:${PORT_PULL_PUSH}`
+    }
+    connection() {
+        this.push.bindSync(this.ip)
+    }
+    sendMessage(msg: string) {
+        console.log('SocketPush enviando: ' + msg.toString())
+        this.push.send(msg)
+    }
+    disconnection() {
+        this.push.close()
+    }
 
-    sendMessage(msg: JSON): void {
-        let query: string = JSON.stringify(msg)
-        push.send(query)
+}
+
+/*
+const Push = function (): SocketPush {
+    const HOST: string = process.env.HOST
+    const PORT_PULL_PUSH: string = process.env.PORT_PULL_PUSH
+
+    const push = zmq.socket('push')
+    const ip: string = `tcp://${HOST}:${PORT_PULL_PUSH}`
+
+    return {
+        connection: function () {
+            push.bindSync(ip)
+        },
+        sendMessage: function (msg: string) {
+            console.log('SocketPush enviando: ' + msg.toString())
+            push.send(msg)
+        },
+        disconnection: function () {
+            push.close()
+        }
     }
 }
+*/
