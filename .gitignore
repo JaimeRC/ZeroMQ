@@ -69,5 +69,6 @@ typings/
 
 .git/
 
+.idea/
 
 # End of https://www.gitignore.io/api/git,node
